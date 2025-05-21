@@ -64,8 +64,8 @@ public class DiscoverFragment extends Fragment implements TorrentAdapter.Recycle
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_discover, container, false);
 
-        TextView tv1337x = rootView.findViewById(R.id.tv1337x);
-        TextView tvLime = rootView.findViewById(R.id.tvLimeTorrents);
+        ImageView tv1337x = rootView.findViewById(R.id.tv1337x);
+        ImageView tvLime = rootView.findViewById(R.id.tvLimeTorrents);
 
         tv1337x.setOnClickListener(v -> on1337xClicked());
         tvLime.setOnClickListener(v -> onLimeTorrentsClicked());
@@ -338,18 +338,15 @@ public class DiscoverFragment extends Fragment implements TorrentAdapter.Recycle
         }
     }
 
-
-
     private void updateSiteSelectionUI() {
         if (getView() == null) return;
 
-        TextView tv1337x = getView().findViewById(R.id.tv1337x);
-        TextView tvLime = getView().findViewById(R.id.tvLimeTorrents);
+        ImageView tv1337x = getView().findViewById(R.id.tv1337x);
+        ImageView tvLime = getView().findViewById(R.id.tvLimeTorrents);
 
         int activeColor = ContextCompat.getColor(requireContext(), R.color.your_active_color);
         int inactiveColor = ContextCompat.getColor(requireContext(), R.color.design_default_color_primary);
 
-        // Compare using constants
         tv1337x.setBackgroundColor(currentSite.equals(SITE_1337X) ? activeColor : inactiveColor);
         tvLime.setBackgroundColor(currentSite.equals(SITE_LIME) ? activeColor : inactiveColor);
     }

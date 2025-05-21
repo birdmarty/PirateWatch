@@ -218,6 +218,18 @@ public class TorrentStreamManager implements TorrentServerListener {
 
     private void launchVlcPlayer(Uri streamUri) {
         try {
+            // First try generic video player intent
+            Intent videoIntent = new Intent(Intent.ACTION_VIEW);
+            videoIntent.setDataAndType(streamUri, "video/*");
+            videoIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            
+            // Check if there are any apps that can handle video playback
+            if (videoIntent.resolveActivity(context.getPackageManager()) != null) {
+                context.startActivity(videoIntent);
+                return;
+            }
+
+            // If no generic video player found, try VLC specifically
             Intent vlcIntent = new Intent(Intent.ACTION_VIEW);
             vlcIntent.setDataAndType(streamUri, "video/*");
             vlcIntent.setPackage("org.videolan.vlc");
@@ -226,11 +238,16 @@ public class TorrentStreamManager implements TorrentServerListener {
             if (vlcIntent.resolveActivity(context.getPackageManager()) != null) {
                 context.startActivity(vlcIntent);
             } else {
-                context.startActivity(new Intent(Intent.ACTION_VIEW,
-                        Uri.parse("market://details?id=org.videolan.vlc")));
+                // If VLC is not installed, prompt to install it
+                Intent marketIntent = new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("market://details?id=org.videolan.vlc"));
+                marketIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(marketIntent);
+                listener.onStreamError("Please install VLC Player to watch videos");
             }
         } catch (Exception e) {
-            listener.onStreamError("Player launch error: " + e.getMessage());
+            Log.e(TAG, "Error launching video player: " + e.getMessage(), e);
+            listener.onStreamError("Error launching video player: " + e.getMessage());
         }
     }
 
