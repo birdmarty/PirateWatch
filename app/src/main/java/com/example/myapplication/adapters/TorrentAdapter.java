@@ -2,7 +2,6 @@ package com.example.myapplication.adapters;
 
 import static com.github.se_bastiaan.torrentstream.utils.ThreadUtils.runOnUiThread;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -20,6 +19,7 @@ import com.example.myapplication.R;
 import com.example.myapplication.models.WatchedTorrent;
 import com.example.myapplication.parsing.SearchResult;
 import com.example.myapplication.services.TorrentDownloadService;
+import com.example.myapplication.utils.TorrentActionDialog;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -79,21 +79,32 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
         holder.infohash.setText(result.getInfoHash());
 
         holder.itemView.setOnClickListener(v -> {
-            Log.d("TorrentAdapter", "Torrent clicked: " + result.getTitle());
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(context);
-            builder.setTitle(result.getTitle())
-                    .setItems(new String[]{"Watch", "Download"}, (dialog, which) -> {
-                        if (which == 0) { // Watch action
-                            handleWatchAction(result);
-                        } else { // Download action
-                            handleDownloadAction(result);
-                        }
-                    })
-                    .show();
+            Log.d(TAG, "Torrent clicked: " + result.getTitle());
+            showTorrentActionDialog(result);
         });
     }
 
+    private void showTorrentActionDialog(SearchResult result) {
+        TorrentActionDialog dialog = new TorrentActionDialog(context, result.getTitle(),
+            new TorrentActionDialog.ActionListener() {
+                @Override
+                public void onWatchClick() {
+                    handleWatchAction(result);
+                }
+
+                @Override
+                public void onDownloadClick() {
+                    handleDownloadAction(result);
+                }
+
+                @Override
+                public void onWatchLaterClick() {
+                    // Placeholder for future implementation
+                }
+            });
+        
+        dialog.show();
+    }
 
     private void saveToFirestore(SearchResult result, String magnetLink) {
         String userId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
@@ -123,8 +134,6 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
                             Toast.makeText(context, "Failed to save progress", Toast.LENGTH_SHORT).show());
                 });
     }
-
-
 
     private void handleWatchAction(SearchResult result) {
         if (result.getInfoHash() != null) {
@@ -169,7 +178,6 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
             }
         });
     }
-
 
     private void handleDownloadAction(SearchResult result) {
         Intent serviceIntent = new Intent(context, TorrentDownloadService.class);

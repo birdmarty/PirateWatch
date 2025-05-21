@@ -1,5 +1,6 @@
 package com.example.myapplication.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +17,8 @@ import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
 import com.example.myapplication.adapters.WatchedTorrentAdapter;
 import com.example.myapplication.models.WatchedTorrent;
+import com.example.myapplication.services.TorrentDownloadService;
+import com.example.myapplication.utils.TorrentActionDialog;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -57,18 +60,42 @@ public class HomeFragment extends Fragment {
     }
 
     private void handleTorrentClick(WatchedTorrent torrent) {
-        Log.d(TAG, "Starting stream for: " + torrent.getTitle());
-        if (getActivity() instanceof MainActivity) {
-            MainActivity activity = (MainActivity) getActivity();
-            String magnetLink = torrent.getMagnetLink();
-            if (magnetLink != null && !magnetLink.isEmpty()) {
-                activity.startTorrentStream(magnetLink);
-            } else if (torrent.getInfoHash() != null) {
-                // If we don't have the magnet link but have the infohash, construct the magnet link
-                String constructedMagnetLink = "magnet:?xt=urn:btih:" + torrent.getInfoHash();
-                activity.startTorrentStream(constructedMagnetLink);
-            }
-        }
+        Log.d(TAG, "Showing action dialog for: " + torrent.getTitle());
+        
+        TorrentActionDialog dialog = new TorrentActionDialog(requireContext(), torrent.getTitle(), 
+            new TorrentActionDialog.ActionListener() {
+                @Override
+                public void onWatchClick() {
+                    if (getActivity() instanceof MainActivity) {
+                        MainActivity activity = (MainActivity) getActivity();
+                        String magnetLink = torrent.getMagnetLink();
+                        if (magnetLink != null && !magnetLink.isEmpty()) {
+                            activity.startTorrentStream(magnetLink);
+                        } else if (torrent.getInfoHash() != null) {
+                            String constructedMagnetLink = "magnet:?xt=urn:btih:" + torrent.getInfoHash();
+                            activity.startTorrentStream(constructedMagnetLink);
+                        }
+                    }
+                }
+
+                @Override
+                public void onDownloadClick() {
+                    Intent serviceIntent = new Intent(requireContext(), TorrentDownloadService.class);
+                    serviceIntent.putExtra("infoHash", torrent.getInfoHash());
+                    serviceIntent.putExtra("torrentLink", torrent.getTorrentLink());
+                    serviceIntent.putExtra("title", torrent.getTitle());
+                    serviceIntent.putExtra("detailPage", torrent.getWebsite());
+                    serviceIntent.putExtra("action", "Download");
+                    requireContext().startService(serviceIntent);
+                }
+
+                @Override
+                public void onWatchLaterClick() {
+                    // Placeholder for future implementation
+                }
+            });
+        
+        dialog.show();
     }
 
     private void loadWatchedContent() {

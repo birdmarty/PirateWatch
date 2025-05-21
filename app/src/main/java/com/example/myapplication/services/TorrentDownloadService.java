@@ -39,6 +39,7 @@ public class TorrentDownloadService extends Service implements TorrentListener {
     private String torrentLink;
     private String detailPageLink;
     private String action;
+    private String torrentUrlMagnet;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
@@ -82,13 +83,16 @@ public class TorrentDownloadService extends Service implements TorrentListener {
             if (infohashElement == null) {
                 Log.e(TAG, "Infohash element not found");
                 return;
-                }
+            }
             String infohash = infohashElement.text();
-            torrentLink = "https://itorrents.org/torrent/" + infohash + ".torrent";
-            Log.d(TAG, "Torrent link: " + torrentLink);
-            startTorrentDownload(torrentLink);
-        }
-         catch (Exception e) {
+            String torrentUrl = "http://itorrents.org/torrent/" + infohash + ".torrent";
+            torrentUrlMagnet = "magnet:?xt=urn:btih:" + infohash;
+
+            Log.d(TAG, "Starting download with torrent URL: " + torrentUrl);
+            Log.d(TAG, "Magnet link backup: " + torrentUrlMagnet);
+
+            startTorrentDownload(torrentUrl);
+        } catch (Exception e) {
             Log.e(TAG, "Error parsing LimeTorrents item", e);
         }
     }
@@ -105,11 +109,13 @@ public class TorrentDownloadService extends Service implements TorrentListener {
             Element infohashElement = doc.selectFirst("div.infohash-box span");
             if (infohashElement != null) {
                 String infohash = infohashElement.text();
-                String torrentUrl = "https://itorrents.org/torrent/" + infohash + ".torrent";
-//                String torrentUrl = "magnet:?xt=urn:btih:" + infohash;
+                String torrentUrl = "http://itorrents.org/torrent/" + infohash + ".torrent";
+                torrentUrlMagnet = "magnet:?xt=urn:btih:" + infohash;
 
+                Log.d(TAG, "Starting download with torrent URL: " + torrentUrl);
+                Log.d(TAG, "Magnet link backup: " + torrentUrlMagnet);
+                
                 startTorrentDownload(torrentUrl);
-
             } else {
                 showErrorToast("Could not find torrent info");
                 stopSelf();
@@ -136,7 +142,7 @@ public class TorrentDownloadService extends Service implements TorrentListener {
             Log.d(TAG, "Torrent download started: " + torrentUrl);
         } catch (Exception e) {
             Log.e(TAG, "Error starting stream: " + e.getMessage());
-            showErrorToast("Failed to start download");
+            showErrorToast("Error starting download");
             stopSelf();
         }
     }
@@ -220,6 +226,24 @@ public class TorrentDownloadService extends Service implements TorrentListener {
     @Override
     public void onStreamError(Torrent torrent, Exception e) {
         Log.e(TAG, "Stream error: " + e.getMessage());
+        
+        // Try magnet link fallback if torrent URL failed
+        if (e.getMessage().contains("No torrent info could be found or read") && torrentUrlMagnet != null && !torrentUrlMagnet.isEmpty()) {
+            Log.d(TAG, "Torrent URL failed, attempting magnet link fallback: " + torrentUrlMagnet);
+            showErrorToast("Torrent URL failed, trying magnet link...");
+            
+            try {
+                // Need to reinitialize torrentStream after error
+                torrentStream.startStream(torrentUrlMagnet);
+                Log.d(TAG, "Magnet link download started successfully");
+                return; // Don't stop the service if magnet link started successfully
+            } catch (Exception e2) {
+                Log.e(TAG, "Error starting stream with magnet link: " + e2.getMessage());
+                showErrorToast("Failed to start download with magnet link");
+            }
+        }
+        
+        // If we get here, either it wasn't a torrent info error or magnet link also failed
         showErrorToast("Download error: " + e.getMessage());
         stopSelf();
     }
