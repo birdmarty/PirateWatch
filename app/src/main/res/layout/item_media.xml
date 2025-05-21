@@ -1,0 +1,67 @@
+<!-- res/layout/item_media.xml -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:background="@drawable/bg_item_outline">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tv_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/design_default_color_secondary"
+        android:textSize="12sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <TextView
+            android:id="@+id/tv_website"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/design_default_color_secondary"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" • "
+            android:textColor="@color/design_default_color_secondary"/>
+
+        <TextView
+            android:id="@+id/tv_timestamp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/design_default_color_secondary"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_info_hash"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:textColor="@color/design_default_color_secondary"
+        android:layout_marginTop="4dp"/>
+
+    <TextView
+        android:id="@+id/tv_torrent_link"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="10sp"
+        android:textColor="@color/design_default_color_secondary"
+        android:ellipsize="end"
+        android:maxLines="1"/>
+</LinearLayout>

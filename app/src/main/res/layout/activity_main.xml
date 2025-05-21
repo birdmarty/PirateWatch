@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="681dp"
+        android:layout_weight="1"
+        android:fitsSystemWindows="true"
+        app:layout_anchor="@+id/fragment_container"
+        app:layout_anchorGravity="start|top">
+
+        <!--        <EditText-->
+        <!--            android:id="@+id/inputSearch"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:hint="Search"-->
+        <!--            android:imeOptions="actionSearch"-->
+        <!--            android:inputType="text" />-->
+    </FrameLayout>
+
+    <LinearLayout
+        android:id="@+id/bottom_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:background="@color/black">
+
+
+        <Button
+            android:id="@+id/btn_home"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Home"
+            android:background="@drawable/button_selector"
+            android:textColor="@color/white"
+            android:textSize="14sp"/>
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btn_movies"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:text="Movies"-->
+        <!--            android:background="@drawable/button_selector"-->
+        <!--            android:textColor="@color/white"-->
+        <!--            android:textSize="13sp"/>-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btn_shows"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:background="@drawable/button_selector"-->
+        <!--            android:text="Shows"-->
+        <!--            android:textColor="@color/white"-->
+        <!--            android:textSize="13sp"/>-->
+
+        <Button
+            android:id="@+id/btn_discover"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_selector"
+            android:text="Discover"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btn_profile"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/button_selector"
+            android:text="Profile"
+            android:textColor="@color/white"
+            android:textSize="14sp" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/loadingIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone"
+        android:src="@drawable/loading"
+        app:layout_anchor="@+id/fragment_container"
+        app:layout_anchorGravity="center" />
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

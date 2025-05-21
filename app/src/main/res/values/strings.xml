@@ -1,0 +1,55 @@
+<resources>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="dont_have_account">Don\'t have an account? Sign Up</string>
+    <string name="app_name">My Application</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Categories for the Spinner -->
+    <string-array name="OneThree_category_options">
+        <item>All</item>
+        <item>Movies</item>
+        <item>TV Shows</item>
+        <item>Games</item>
+        <item>Music</item>
+        <item>Applications</item>
+        <item>Documentaries</item>
+        <item>Anime</item>
+        <item>Other</item>
+        <item>XXX</item>
+    </string-array>
+
+    <!-- Sorting options for the Spinner -->
+    <string-array name="OneThree_sort_options">
+        <item>Sort By...</item>
+        <item>Seeders DESC</item>
+        <item>Seeders ASC</item>
+        <item>Leechers DESC</item>
+        <item>Leechers ASC</item>
+        <item>Size DESC</item>
+        <item>Size ASC</item>
+        <item>Date DESC</item>
+        <item>Date ASC</item>
+    </string-array>
+
+    <string-array name="Lime_category_options">
+        <item>All</item>
+        <item>Anime</item>
+        <item>Applications</item>
+        <item>Games</item>
+        <item>Movies</item>
+        <item>Music</item>
+        <item>TV Shows</item>
+        <item>Other</item>
+    </string-array>
+
+    <string-array name="Lime_sort_options">
+        <item>Sort By...</item>
+        <item>Seeders</item>
+        <item>Leechers</item>
+        <item>Size</item>
+        <item>Date</item>
+    </string-array>
+
+
+</resources>

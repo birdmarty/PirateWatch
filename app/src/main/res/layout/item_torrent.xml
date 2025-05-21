@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/text_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:text="Title" />
+
+    <TextView
+        android:id="@+id/text_seeds"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Seeds" />
+
+    <TextView
+        android:id="@+id/text_leeches"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Leeches" />
+
+    <TextView
+        android:id="@+id/text_size"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Size" />
+
+    <TextView
+        android:id="@+id/text_website"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Website"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:id="@+id/text_link"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Link"
+        android:visibility="invisible"/>
+
+    <TextView
+        android:id="@+id/text_infohash"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Infohash"
+        android:visibility="invisible"/>
+</LinearLayout>

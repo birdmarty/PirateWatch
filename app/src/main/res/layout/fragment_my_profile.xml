@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Account Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Account"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/design_default_color_primary"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Email Info -->
+        <TextView
+            android:id="@+id/current_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Current Email: "
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Change Password Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_change_password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Change Password"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+        <!-- Change Email Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_change_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Change Email"
+            android:layout_marginBottom="8dp"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+        <!-- Logout Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_logout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Log Out"
+            android:layout_marginBottom="24dp"
+            app:backgroundTint="@android:color/holo_red_light"/>
+
+        <!-- Download Settings Section -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Download Settings"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="@color/design_default_color_primary"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Current Download Location -->
+        <TextView
+            android:id="@+id/current_download_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Current Location: "
+            android:textSize="16sp"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Change Download Location Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_change_download_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Change Download Location"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+        <!-- Progress Bar -->
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+</ScrollView>

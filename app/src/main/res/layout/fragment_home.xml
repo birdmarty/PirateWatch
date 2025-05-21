@@ -1,0 +1,76 @@
+<!-- res/layout/fragment_home.xml -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <!-- Continue Watching Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Continue Watching"
+                android:textColor="@android:color/white"
+                android:background="@color/design_default_color_primary"
+                android:padding="8dp"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_continue_watching"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:scrollbars="horizontal"
+                android:paddingVertical="8dp"/>
+
+        </LinearLayout>
+
+        <!-- Wishlist Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Your Wishlist"
+                android:textColor="@android:color/white"
+                android:background="@color/design_default_color_primary"
+                android:padding="8dp"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_wishlist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="vertical"
+                android:paddingVertical="8dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+</ScrollView>
