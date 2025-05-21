@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.MainActivity;
 import com.example.myapplication.R;
+import com.example.myapplication.models.WatchLaterTorrent;
 import com.example.myapplication.models.WatchedTorrent;
 import com.example.myapplication.parsing.SearchResult;
 import com.example.myapplication.services.TorrentDownloadService;
@@ -41,6 +42,7 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
     private final RecyclerviewListener listener;
 
     private static final String COLLECTION_WATCHED = "watched_torrents";
+    private static final String COLLECTION_WATCH_LATER = "watch_later_torrents";
     private static final String FIELD_TITLE = "title";
     private static final String FIELD_INFOHASH = "infoHash";
     private static final String FIELD_TIMESTAMP = "timestamp";
@@ -99,46 +101,67 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
 
                 @Override
                 public void onWatchLaterClick() {
-                    // Placeholder for future implementation
+                    handleWatchLaterAction(result);
                 }
             });
         
         dialog.show();
     }
 
-    private void saveToFirestore(SearchResult result, String magnetLink) {
+    private void saveToFirestore(SearchResult result, String magnetLink, String collection) {
         String userId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
         if (userId == null) {
             Toast.makeText(context, "You must be logged in to save progress", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        WatchedTorrent torrent = new WatchedTorrent(
-                result.getTitle(),
-                result.getInfoHash(),
-                magnetLink,
-                result.getLink(),       // torrentLink
-                result.getWebsite(),    // website
-                com.google.firebase.Timestamp.now(),
-                userId,
-                result.getSize()
-        );
-
-        db.collection(COLLECTION_WATCHED)
-                .add(torrent)
-                .addOnSuccessListener(documentReference ->
-                        Log.d(TAG, "Torrent saved with ID: " + documentReference.getId()))
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, "Error saving torrent", e);
-                    runOnUiThread(() ->
-                            Toast.makeText(context, "Failed to save progress", Toast.LENGTH_SHORT).show());
-                });
+        if (collection.equals(COLLECTION_WATCHED)) {
+            WatchedTorrent torrent = new WatchedTorrent(
+                    result.getTitle(),
+                    result.getInfoHash(),
+                    magnetLink,
+                    result.getLink(),       // torrentLink
+                    result.getWebsite(),    // website
+                    com.google.firebase.Timestamp.now(),
+                    userId,
+                    result.getSize()
+            );
+            db.collection(collection)
+                    .add(torrent)
+                    .addOnSuccessListener(documentReference ->
+                            Log.d(TAG, "Watched torrent saved with ID: " + documentReference.getId()))
+                    .addOnFailureListener(e -> {
+                        Log.w(TAG, "Error saving watched torrent", e);
+                        runOnUiThread(() ->
+                                Toast.makeText(context, "Failed to save progress", Toast.LENGTH_SHORT).show());
+                    });
+        } else if (collection.equals(COLLECTION_WATCH_LATER)) {
+            WatchLaterTorrent torrent = new WatchLaterTorrent(
+                    result.getTitle(),
+                    result.getInfoHash(),
+                    magnetLink,
+                    result.getLink(),       // torrentLink
+                    result.getWebsite(),    // website
+                    com.google.firebase.Timestamp.now(),
+                    userId,
+                    result.getSize()
+            );
+            db.collection(collection)
+                    .add(torrent)
+                    .addOnSuccessListener(documentReference ->
+                            Log.d(TAG, "Watch later torrent saved with ID: " + documentReference.getId()))
+                    .addOnFailureListener(e -> {
+                        Log.w(TAG, "Error saving watch later torrent", e);
+                        runOnUiThread(() ->
+                                Toast.makeText(context, "Failed to save to watch later", Toast.LENGTH_SHORT).show());
+                    });
+        }
     }
 
     private void handleWatchAction(SearchResult result) {
         if (result.getInfoHash() != null) {
             String magnetLink = "magnet:?xt=urn:btih:" + result.getInfoHash();
-            saveToFirestore(result, magnetLink);
+            saveToFirestore(result, magnetLink, COLLECTION_WATCHED);
             startStream(magnetLink);
         } else {
             new Thread(() -> {
@@ -154,11 +177,44 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
                     if (infohashElement != null) {
                         String infohash = infohashElement.text();
                         String magnetLink = "magnet:?xt=urn:btih:" + infohash;
-                        saveToFirestore(result, magnetLink);
+                        saveToFirestore(result, magnetLink, COLLECTION_WATCHED);
                         Log.d(TAG, "Successfully fetched infohash: " + infohash);
                         startStream(magnetLink);
                     } else {
                         Log.e(TAG, "Infohash element not found");
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error fetching infohash", e);
+                    runOnUiThread(() ->
+                            Toast.makeText(context, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                }
+            }).start();
+        }
+    }
+
+    private void handleWatchLaterAction(SearchResult result) {
+        if (result.getInfoHash() != null) {
+            String magnetLink = "magnet:?xt=urn:btih:" + result.getInfoHash();
+            saveToFirestore(result, magnetLink, COLLECTION_WATCH_LATER);
+            Toast.makeText(context, "Added to Watch Later", Toast.LENGTH_SHORT).show();
+        } else {
+            new Thread(() -> {
+                try {
+                    Document doc = Jsoup.connect(result.getLink())
+                            .userAgent("Mozilla/5.0")
+                            .timeout(15000)
+                            .get();
+
+                    Element infohashElement = doc.selectFirst("div.infohash-box span");
+                    if (infohashElement != null) {
+                        String infohash = infohashElement.text();
+                        String magnetLink = "magnet:?xt=urn:btih:" + infohash;
+                        saveToFirestore(result, magnetLink, COLLECTION_WATCH_LATER);
+                        runOnUiThread(() -> 
+                            Toast.makeText(context, "Added to Watch Later", Toast.LENGTH_SHORT).show());
+                    } else {
+                        runOnUiThread(() -> 
+                            Toast.makeText(context, "Could not find torrent info", Toast.LENGTH_SHORT).show());
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error fetching infohash", e);
