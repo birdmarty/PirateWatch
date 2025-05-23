@@ -11,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.view.View;
 
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,6 +26,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.myapplication.fragments.DiscoverFragment;
+import com.example.myapplication.fragments.FullScreenLoginFragment;
+import com.example.myapplication.fragments.FullScreenSignUpFragment;
 import com.example.myapplication.fragments.ProfileFragment;
 import com.example.myapplication.fragments.SignIn;
 import com.example.myapplication.fragments.SignUp;
@@ -41,7 +44,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.io.File;
 
-public class MainActivity extends AppCompatActivity implements TorrentStreamManager.TorrentStreamListener, SignIn.AuthListener, SignUp.AuthListener{
+public class MainActivity extends AppCompatActivity implements TorrentStreamManager.TorrentStreamListener, SignIn.AuthListener, SignUp.AuthListener, FullScreenLoginFragment.AuthListener, FullScreenSignUpFragment.AuthListener {
 
 
     private TorrentStreamManager torrentStreamManager;
@@ -60,41 +63,29 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-//        inputSearch = findViewById(R.id.inputSearch);
-//        inputSearch.setOnEditorActionListener(editorActionListener);
         requestPermissions();
 
-
         Button btnHome = findViewById(R.id.btn_home);
-//        Button btnMovies = findViewById(R.id.btn_movies);
-//        Button btnShows = findViewById(R.id.btn_shows);
         Button btnProfile = findViewById(R.id.btn_profile);
         Button btnDiscover = findViewById(R.id.btn_discover);
 
-        // Load the default fragment
-//        loadFragment(new HomeFragment());
-        loadFragment(new SignUp());
-
-//        btnHome.setOnClickListener(v -> loadFragment(new HomeFragment()));
-        btnHome.setOnClickListener(v -> loadFragment(new SignUp()));
-//        btnMovies.setOnClickListener(v -> loadFragment(new MoviesFragment()));
-//        btnShows.setOnClickListener(v -> loadFragment(new ShowsFragment()));
-        btnProfile.setOnClickListener(v -> loadFragment(new ProfileFragment()));
-        btnDiscover.setOnClickListener(v -> loadFragment(new DiscoverFragment()));
-
         FirebaseAuth auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() != null && auth.getCurrentUser().isEmailVerified()) {
+        if (auth.getCurrentUser() != null) {
+            // User is either logged in or in guest mode
+            showNavigationButtons(true);
             loadFragment(new HomeFragment());
         } else {
-            loadFragment(new SignUp());
+            // Show login first
+            showNavigationButtons(false);
+            loadFragment(new SignIn());
         }
-
 
         btnHome.setOnClickListener(v -> {
             if (isUserAuthenticated()) {
                 loadFragment(new HomeFragment());
             } else {
-                loadFragment(new SignUp());
+                showNavigationButtons(false);
+                loadFragment(new SignIn());
             }
         });
 
@@ -102,28 +93,51 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
             if (isUserAuthenticated()) {
                 loadFragment(new ProfileFragment());
             } else {
-                loadFragment(new SignUp());
+                showNavigationButtons(false);
+                loadFragment(new SignIn());
             }
         });
-        // TODO: Move sign up to profile section, this shit is retarded...
 
+        btnDiscover.setOnClickListener(v -> {
+            if (isUserAuthenticated()) {
+                loadFragment(new DiscoverFragment());
+            } else {
+                showNavigationButtons(false);
+                loadFragment(new SignIn());
+            }
+        });
+    }
+
+    private void showNavigationButtons(boolean show) {
+        View bottomButtons = findViewById(R.id.bottom_buttons);
+        if (bottomButtons != null) {
+            bottomButtons.setVisibility(show ? View.VISIBLE : View.GONE);
+        }
     }
 
     private boolean isUserAuthenticated() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        return user != null && user.isEmailVerified();
+        return user != null; // Allow both regular and anonymous users
     }
 
     @Override
     public void onAuthSuccess() {
         runOnUiThread(() -> {
+            showNavigationButtons(true);
             loadFragment(new HomeFragment());
             // Clear back stack
             getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         });
     }
 
-
+    @Override
+    public void onAuthCancel() {
+        runOnUiThread(() -> {
+            showNavigationButtons(true);
+            // Go back to previous fragment
+            getSupportFragmentManager().popBackStack();
+        });
+    }
 
     public void startTorrentStream(String magnetUrl) {
         if (torrentStreamManager != null) {
@@ -158,6 +172,14 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
 
     private boolean loadFragment(Fragment fragment) {
         if (fragment != null) {
+            // Hide navigation buttons if showing login/signup
+            if (fragment instanceof SignIn || fragment instanceof SignUp || 
+                fragment instanceof FullScreenLoginFragment || fragment instanceof FullScreenSignUpFragment) {
+                showNavigationButtons(false);
+            } else {
+                showNavigationButtons(true);
+            }
+
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, fragment)
                     .commit();
@@ -232,6 +254,48 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
         if (torrentStreamManager != null) {
             torrentStreamManager.cleanup();
         }
+        clearAppCache();
+    }
+
+    private void clearAppCache() {
+        try {
+            // Clear internal cache
+            File cacheDir = getCacheDir();
+            File externalCacheDir = getExternalCacheDir();
+            
+            // Clear internal cache
+            if (cacheDir != null && cacheDir.exists()) {
+                deleteRecursive(cacheDir);
+            }
+            
+            // Clear external cache
+            if (externalCacheDir != null && externalCacheDir.exists()) {
+                deleteRecursive(externalCacheDir);
+            }
+            
+            // Clear torrent stream cache
+            File torrentCacheDir = new File(Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS), "TorrentStream");
+            if (torrentCacheDir.exists()) {
+                deleteRecursive(torrentCacheDir);
+            }
+            
+            Log.d(TAG, "Cache cleared successfully");
+        } catch (Exception e) {
+            Log.e(TAG, "Error clearing cache: " + e.getMessage());
+        }
+    }
+
+    private boolean deleteRecursive(File fileOrDirectory) {
+        if (fileOrDirectory.isDirectory()) {
+            File[] files = fileOrDirectory.listFiles();
+            if (files != null) {
+                for (File child : files) {
+                    deleteRecursive(child);
+                }
+            }
+        }
+        return fileOrDirectory.delete();
     }
 
     public void initTorrentStream() {

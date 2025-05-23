@@ -83,6 +83,18 @@
             android:textColor="@android:color/white"
             app:layout_constraintTop_toBottomOf="@id/forgot_password" />
 
+        <!-- Continue as Guest Button -->
+        <Button
+            android:id="@+id/continue_as_guest_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Continue as Guest"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/design_default_color_secondary"
+            android:textColor="@android:color/white"
+            app:layout_constraintTop_toBottomOf="@id/login_button" />
+
         <!-- Progress Bar -->
         <ProgressBar
             android:id="@+id/progressBar"
@@ -92,7 +104,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/login_button" />
+            app:layout_constraintTop_toBottomOf="@id/continue_as_guest_button" />
 
         <!-- Signup Redirect -->
         <TextView

@@ -14,9 +14,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
+import com.example.myapplication.utils.DownloadLocationManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
@@ -30,7 +32,7 @@ import java.io.File;
  * Use the {@link ProfileFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class ProfileFragment extends Fragment {
+public class ProfileFragment extends Fragment implements FullScreenLoginFragment.AuthListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -80,7 +82,7 @@ public class ProfileFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_profile, container, false);
 
         // Initialize Firebase Auth
@@ -89,7 +91,7 @@ public class ProfileFragment extends Fragment {
         // Initialize views
         currentEmailView = view.findViewById(R.id.current_email);
         currentDownloadLocationView = view.findViewById(R.id.current_download_location);
-        progressBar = view.findViewById(R.id.progress_bar);
+        progressBar = view.findViewById(R.id.progressBar);
         MaterialButton changePasswordButton = view.findViewById(R.id.btn_change_password);
         MaterialButton changeEmailButton = view.findViewById(R.id.btn_change_email);
         MaterialButton logoutButton = view.findViewById(R.id.btn_logout);
@@ -102,21 +104,46 @@ public class ProfileFragment extends Fragment {
         changeDownloadLocationButton.setOnClickListener(v -> handleChangeDownloadLocation());
 
         // Initialize download location
-        currentDownloadLocation = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS), "TorrentStream");
-
-        // Update UI
-        updateUI();
+        // Update UI after view is created
+        updateUI(view);
 
         return view;
     }
 
-    private void updateUI() {
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        
+        // Initialize download location from manager
+        currentDownloadLocation = DownloadLocationManager.getInstance(requireContext()).getCurrentLocation();
+        updateDownloadLocationText();
+    }
+
+    private void updateUI(View view) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
-            currentEmailView.setText("Current Email: " + user.getEmail());
+            if (user.isAnonymous()) {
+                // Guest user
+                currentEmailView.setText("Guest Mode");
+                MaterialButton logoutButton = view.findViewById(R.id.btn_logout);
+                logoutButton.setText("Log In");
+                view.findViewById(R.id.btn_change_password).setVisibility(View.GONE);
+                view.findViewById(R.id.btn_change_email).setVisibility(View.GONE);
+            } else {
+                // Regular user
+                currentEmailView.setText("Current Email: " + user.getEmail());
+                MaterialButton logoutButton = view.findViewById(R.id.btn_logout);
+                logoutButton.setText("Log Out");
+                view.findViewById(R.id.btn_change_password).setVisibility(View.VISIBLE);
+                view.findViewById(R.id.btn_change_email).setVisibility(View.VISIBLE);
+            }
         }
-        currentDownloadLocationView.setText("Current Location: " + currentDownloadLocation.getAbsolutePath());
+        if (currentDownloadLocation != null){
+            currentDownloadLocationView.setText("Current Location: " + currentDownloadLocation.getAbsolutePath());
+        }
+        else {
+            currentDownloadLocationView.setText("Current Location: Not set");
+        }
     }
 
     private void showChangePasswordDialog() {
@@ -227,7 +254,7 @@ public class ProfileFragment extends Fragment {
                                         progressBar.setVisibility(View.GONE);
                                         if (task2.isSuccessful()) {
                                             Toast.makeText(getContext(), "Email updated successfully", Toast.LENGTH_SHORT).show();
-                                            updateUI();
+                                            updateUI(requireView());
                                             // Send verification email
                                             user.sendEmailVerification();
                                         } else {
@@ -243,18 +270,40 @@ public class ProfileFragment extends Fragment {
     }
 
     private void handleLogout() {
-        new AlertDialog.Builder(getContext())
-                .setTitle("Logout")
-                .setMessage("Are you sure you want to logout?")
-                .setPositiveButton("Yes", (dialog, which) -> {
-                    mAuth.signOut();
-                    // Navigate to SignUp fragment
-                    requireActivity().getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, new SignUp())
-                            .commit();
-                })
-                .setNegativeButton("No", null)
-                .show();
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null && user.isAnonymous()) {
+            // For guest users, show full screen login
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, new FullScreenLoginFragment())
+                    .addToBackStack(null)
+                    .commit();
+        } else {
+            // For regular users, show confirmation dialog
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Logout")
+                    .setMessage("Are you sure you want to logout?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        mAuth.signOut();
+                        requireActivity().getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, new SignUp())
+                                .commit();
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+        }
+    }
+
+    @Override
+    public void onAuthSuccess() {
+        // User successfully logged in
+        requireActivity().getSupportFragmentManager().popBackStack();
+        updateUI(requireView());
+    }
+
+    @Override
+    public void onAuthCancel() {
+        // User cancelled login, go back to profile
+        requireActivity().getSupportFragmentManager().popBackStack();
     }
 
     private void handleChangeDownloadLocation() {
@@ -271,16 +320,27 @@ public class ProfileFragment extends Fragment {
         if (requestCode == 1 && data != null) {
             Uri treeUri = data.getData();
             if (treeUri != null) {
-                // Get the path from the URI
-                String path = treeUri.getPath();
-                if (path != null) {
-                    // Update the download location
-                    currentDownloadLocation = new File(path);
-                    // Update the UI
-                    updateUI();
-                    Toast.makeText(getContext(), "Download location updated", Toast.LENGTH_SHORT).show();
-                }
+                // Update the download location using the URI
+                DownloadLocationManager.getInstance(requireContext()).setCurrentLocationFromUri(treeUri);
+                currentDownloadLocation = DownloadLocationManager.getInstance(requireContext()).getCurrentLocation();
+                // Update the UI
+                updateUI(requireView());
+                Toast.makeText(getContext(), "Download location updated", Toast.LENGTH_SHORT).show();
             }
+        }
+    }
+
+    private void updateDownloadLocation(File newLocation) {
+        if (newLocation != null) {
+            DownloadLocationManager.getInstance(requireContext()).setCurrentLocation(newLocation);
+            currentDownloadLocation = newLocation;
+            updateDownloadLocationText();
+        }
+    }
+
+    private void updateDownloadLocationText() {
+        if (currentDownloadLocation != null) {
+            currentDownloadLocationView.setText("Current Location: " + currentDownloadLocation.getAbsolutePath());
         }
     }
 }

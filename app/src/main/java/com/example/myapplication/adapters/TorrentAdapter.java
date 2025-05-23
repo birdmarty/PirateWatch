@@ -91,13 +91,13 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
             new TorrentActionDialog.ActionListener() {
                 @Override
                 public void onWatchClick() {
-                    handleWatchAction(result);
+                            handleWatchAction(result);
                 }
 
                 @Override
                 public void onDownloadClick() {
-                    handleDownloadAction(result);
-                }
+                            handleDownloadAction(result);
+                        }
 
                 @Override
                 public void onWatchLaterClick() {
@@ -109,33 +109,29 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
     }
 
     private void saveToFirestore(SearchResult result, String magnetLink, String collection) {
-        String userId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : null;
-        if (userId == null) {
-            Toast.makeText(context, "You must be logged in to save progress", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        String userId = mAuth.getCurrentUser() != null ? mAuth.getCurrentUser().getUid() : "anonymous";
+        
         if (collection.equals(COLLECTION_WATCHED)) {
-            WatchedTorrent torrent = new WatchedTorrent(
-                    result.getTitle(),
-                    result.getInfoHash(),
-                    magnetLink,
-                    result.getLink(),       // torrentLink
-                    result.getWebsite(),    // website
-                    com.google.firebase.Timestamp.now(),
-                    userId,
-                    result.getSize()
-            );
+        WatchedTorrent torrent = new WatchedTorrent(
+                result.getTitle(),
+                result.getInfoHash(),
+                magnetLink,
+                result.getLink(),       // torrentLink
+                result.getWebsite(),    // website
+                com.google.firebase.Timestamp.now(),
+                userId,
+                result.getSize()
+        );
             db.collection(collection)
-                    .add(torrent)
-                    .addOnSuccessListener(documentReference ->
+                .add(torrent)
+                .addOnSuccessListener(documentReference ->
                             Log.d(TAG, "Watched torrent saved with ID: " + documentReference.getId()))
-                    .addOnFailureListener(e -> {
+                .addOnFailureListener(e -> {
                         Log.w(TAG, "Error saving watched torrent", e);
-                        runOnUiThread(() ->
-                                Toast.makeText(context, "Failed to save progress", Toast.LENGTH_SHORT).show());
-                    });
-        } else if (collection.equals(COLLECTION_WATCH_LATER)) {
+                    runOnUiThread(() ->
+                            Toast.makeText(context, "Failed to save progress", Toast.LENGTH_SHORT).show());
+                });
+        } else {
             WatchLaterTorrent torrent = new WatchLaterTorrent(
                     result.getTitle(),
                     result.getInfoHash(),
@@ -182,6 +178,8 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
                         startStream(magnetLink);
                     } else {
                         Log.e(TAG, "Infohash element not found");
+                        runOnUiThread(() ->
+                                Toast.makeText(context, "Could not find torrent info", Toast.LENGTH_SHORT).show());
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Error fetching infohash", e);
@@ -196,7 +194,8 @@ public class TorrentAdapter extends RecyclerView.Adapter<TorrentAdapter.ViewHold
         if (result.getInfoHash() != null) {
             String magnetLink = "magnet:?xt=urn:btih:" + result.getInfoHash();
             saveToFirestore(result, magnetLink, COLLECTION_WATCH_LATER);
-            Toast.makeText(context, "Added to Watch Later", Toast.LENGTH_SHORT).show();
+            runOnUiThread(() -> 
+                Toast.makeText(context, "Added to Watch Later", Toast.LENGTH_SHORT).show());
         } else {
             new Thread(() -> {
                 try {

@@ -15,12 +15,14 @@ import android.widget.Toast;
 import androidx.core.app.NotificationCompat;
 
 import com.example.myapplication.R;
+import com.example.myapplication.utils.DownloadLocationManager;
 import com.github.se_bastiaan.torrentstream.StreamStatus;
 import com.github.se_bastiaan.torrentstream.Torrent;
 import com.github.se_bastiaan.torrentstream.TorrentOptions;
 import com.github.se_bastiaan.torrentstream.TorrentStream;
 import com.github.se_bastiaan.torrentstream.listeners.TorrentListener;
 
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -41,6 +43,8 @@ public class TorrentDownloadService extends Service implements TorrentListener {
     private String action;
     private String torrentUrlMagnet;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private File downloadLocation;
+    private FirebaseAuth mAuth;
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -66,7 +70,6 @@ public class TorrentDownloadService extends Service implements TorrentListener {
                 // add watch implementation here
             }
         }
-
 
         return START_STICKY;
     }
@@ -96,7 +99,6 @@ public class TorrentDownloadService extends Service implements TorrentListener {
             Log.e(TAG, "Error parsing LimeTorrents item", e);
         }
     }
-
 
     private void fetchAndStartTorrent() {
         try {
@@ -149,38 +151,39 @@ public class TorrentDownloadService extends Service implements TorrentListener {
 
     private void initializeTorrentStream() {
         try {
-            File saveLocation = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_DOWNLOADS), "TorrentStream");
-            if (!saveLocation.exists()) {
-                saveLocation.mkdirs();
+            downloadLocation = DownloadLocationManager.getInstance(this).getCurrentLocation();
+            if (!downloadLocation.exists()) {
+                Log.d(TAG, "Download location doesn't exist, creating: " + downloadLocation.getAbsolutePath());
+                downloadLocation.mkdirs();
             }
 
             TorrentOptions torrentOptions = new TorrentOptions.Builder()
-                    .saveLocation(saveLocation)
+                    .saveLocation(downloadLocation)
                     .removeFilesAfterStop(false)
                     .build();
             torrentStream = TorrentStream.init(torrentOptions);
             torrentStream.addListener(this);
-
-
-            // Configure torrent options for maximum performance
-//            TorrentOptions torrentOptions = new TorrentOptions.Builder()
-//                    .saveLocation(saveLocation)
-//                    .removeFilesAfterStop(false)
-//                    .maxConnections(500) // Maximum allowed connections
-//                    .maxDownloadSpeed(0)  // 0 = unlimited download
-//                    .prepareSize(30 * 1024L * 1024L) // 30MB initial buffer
-//                    .listeningPort(6891)  // Standard BitTorrent port
-//                    .build();
-//
-//            torrentStream = TorrentStream.init(torrentOptions);
-//            torrentStream.addListener(this);
+            Log.d(TAG, "Download location: " + downloadLocation.getAbsolutePath());
         } catch (Exception e) {
             Log.e(TAG, "Error initializing TorrentStream: " + e.getMessage());
         }
     }
 
+    private void initializeDownloadLocation() {
+        downloadLocation = DownloadLocationManager.getInstance(this).getCurrentLocation();
+        Log.d(TAG, "Download location from profile: " + downloadLocation.getAbsolutePath());
+        if (!downloadLocation.exists()) {
+            downloadLocation.mkdirs();
+        }
+    }
 
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mAuth = FirebaseAuth.getInstance();
+        initializeDownloadLocation();
+        // ... rest of existing onCreate code ...
+    }
 
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -209,8 +212,6 @@ public class TorrentDownloadService extends Service implements TorrentListener {
     private void showErrorToast(String message) {
         runOnUiThread(() -> Toast.makeText(this, message, Toast.LENGTH_SHORT).show());
     }
-
-
 
     // TorrentListener callbacks
     @Override
@@ -263,9 +264,7 @@ public class TorrentDownloadService extends Service implements TorrentListener {
     @Override
     public void onStreamProgress(Torrent torrent, StreamStatus status) {
         if (status.bufferProgress < 100) {
-
             Log.d(TAG, "progress: " + status.bufferProgress + " speed: " + (status.downloadSpeed / 1024) + " seeds: " + status.seeds);
-
             updateNotification((int) status.bufferProgress, status.downloadSpeed / 1024, status.seeds);
         }
     }

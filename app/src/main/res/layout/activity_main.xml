@@ -1,37 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true">
-
-
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="681dp"
-        android:layout_weight="1"
-        android:fitsSystemWindows="true"
-        app:layout_anchor="@+id/fragment_container"
-        app:layout_anchorGravity="start|top">
-
-        <!--        <EditText-->
-        <!--            android:id="@+id/inputSearch"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:hint="Search"-->
-        <!--            android:imeOptions="actionSearch"-->
-        <!--            android:inputType="text" />-->
-    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/bottom_buttons"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_gravity="bottom"
+        android:layout_alignParentBottom="true"
         android:background="@color/black">
-
 
         <Button
             android:id="@+id/btn_home"
@@ -85,15 +65,18 @@
 
     </LinearLayout>
 
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_buttons"/>
+
     <ImageView
         android:id="@+id/loadingIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:visibility="gone"
-        android:src="@drawable/loading"
-        app:layout_anchor="@+id/fragment_container"
-        app:layout_anchorGravity="center" />
+        android:src="@drawable/loading"/>
 
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</RelativeLayout>

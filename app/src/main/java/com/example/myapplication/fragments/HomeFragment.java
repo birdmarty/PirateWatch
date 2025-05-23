@@ -41,7 +41,7 @@ public class HomeFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                           Bundle savedInstanceState) {
+                             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Initialize views
@@ -157,7 +157,9 @@ public class HomeFragment extends Fragment {
     private void loadWatchedContent() {
         progressBar.setVisibility(View.VISIBLE);
 
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String userId = FirebaseAuth.getInstance().getCurrentUser() != null ? 
+            FirebaseAuth.getInstance().getCurrentUser().getUid() : "anonymous";
+            
         FirebaseFirestore.getInstance().collection("watched_torrents")
                 .whereEqualTo("userId", userId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
@@ -175,7 +177,9 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadWatchLaterContent() {
-        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        String userId = FirebaseAuth.getInstance().getCurrentUser() != null ? 
+            FirebaseAuth.getInstance().getCurrentUser().getUid() : "anonymous";
+            
         FirebaseFirestore.getInstance().collection("watch_later_torrents")
                 .whereEqualTo("userId", userId)
                 .orderBy("timestamp", Query.Direction.DESCENDING)

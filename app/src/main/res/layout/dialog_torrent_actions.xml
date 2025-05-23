@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="32dp"
     app:cardCornerRadius="16dp"
-    app:cardBackgroundColor="#E6FFFFFF">
+    app:cardBackgroundColor="@android:color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -71,10 +71,9 @@
             android:id="@+id/btn_watch_later"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Watch Later"
+            android:text="Add to Watch Later"
             android:textSize="16sp"
             android:padding="16dp"
-            android:alpha="0.5"
             app:icon="@android:drawable/ic_menu_my_calendar"
             app:iconGravity="textStart"
             style="@style/Widget.MaterialComponents.Button.TextButton"/>

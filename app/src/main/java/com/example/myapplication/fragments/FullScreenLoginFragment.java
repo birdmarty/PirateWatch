@@ -1,19 +1,18 @@
 package com.example.myapplication.fragments;
 
-import android.content.Context;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
 import com.example.myapplication.utils.PasswordResetHelper;
@@ -23,37 +22,46 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 
-public class SignIn extends Fragment {
+public class FullScreenLoginFragment extends Fragment {
     private FirebaseAuth mAuth;
     private EditText emailEditText, passwordEditText;
     private ProgressBar progressBar;
     private AuthListener authListener;
 
+    public interface AuthListener {
+        void onAuthSuccess();
+        void onAuthCancel();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
+        View view = inflater.inflate(R.layout.dialog_fullscreen_login, container, false);
 
         mAuth = FirebaseAuth.getInstance();
         emailEditText = view.findViewById(R.id.email);
         passwordEditText = view.findViewById(R.id.password);
         progressBar = view.findViewById(R.id.progressBar);
         Button loginButton = view.findViewById(R.id.login_button);
-        Button continueAsGuestButton = view.findViewById(R.id.continue_as_guest_button);
         TextView signupRedirect = view.findViewById(R.id.signup_redirect);
         TextView forgotPassword = view.findViewById(R.id.forgot_password);
+        ImageButton closeButton = view.findViewById(R.id.close_button);
 
         loginButton.setOnClickListener(v -> attemptLogin());
-        continueAsGuestButton.setOnClickListener(v -> continueAsGuest());
         signupRedirect.setOnClickListener(v -> navigateToSignUp());
         forgotPassword.setOnClickListener(v -> showResetPasswordDialog());
+        closeButton.setOnClickListener(v -> {
+            if (authListener != null) {
+                authListener.onAuthCancel();
+            }
+        });
 
         return view;
     }
 
     private void navigateToSignUp() {
         requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, new SignUp())
+                .replace(R.id.fragment_container, new FullScreenSignUpFragment())
                 .addToBackStack(null)
                 .commit();
     }
@@ -95,7 +103,9 @@ public class SignIn extends Fragment {
     private void checkEmailVerification() {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null && user.isEmailVerified()) {
-            navigateToMain();
+            if (authListener != null) {
+                authListener.onAuthSuccess();
+            }
         } else {
             Toast.makeText(getContext(),
                     "Please verify your email first", Toast.LENGTH_SHORT).show();
@@ -115,32 +125,12 @@ public class SignIn extends Fragment {
         Toast.makeText(getContext(), error, Toast.LENGTH_SHORT).show();
     }
 
-    private void continueAsGuest() {
-        progressBar.setVisibility(View.VISIBLE);
-        mAuth.signInAnonymously()
-            .addOnCompleteListener(requireActivity(), task -> {
-                progressBar.setVisibility(View.GONE);
-                if (task.isSuccessful()) {
-                    // Guest sign in successful
-                    navigateToMain();
-                } else {
-                    // If sign in fails, display a message to the user
-                    Toast.makeText(getContext(), "Guest mode failed: " + task.getException().getMessage(),
-                            Toast.LENGTH_SHORT).show();
-                }
-            });
-    }
-
     private void showResetPasswordDialog() {
         new PasswordResetHelper(requireContext()).showResetPasswordDialog();
     }
 
-    public interface AuthListener {
-        void onAuthSuccess();
-    }
-
     @Override
-    public void onAttach(@NonNull Context context) {
+    public void onAttach(@NonNull android.content.Context context) {
         super.onAttach(context);
         if (context instanceof AuthListener) {
             authListener = (AuthListener) context;
@@ -148,10 +138,4 @@ public class SignIn extends Fragment {
             throw new RuntimeException(context + " must implement AuthListener");
         }
     }
-
-    private void navigateToMain() {
-        if (authListener != null) {
-            authListener.onAuthSuccess();
-        }
-    }
-}
+} 

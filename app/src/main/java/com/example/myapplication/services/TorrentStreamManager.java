@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 
@@ -27,10 +28,14 @@ public class TorrentStreamManager implements TorrentServerListener {
     private static final String TAG = "TorrentStreamManager";
     private static final String STREAM_CHANNEL_ID = "torrent_stream_channel";
     private static final int STREAM_NOTIFICATION_ID = 1001;
+    private static final int PROGRESS_UPDATE_THRESHOLD = 5; // Only update notification every 5% change
 
     private final Context context;
     private TorrentStreamServer torrentStreamServer;
     private TorrentStreamListener listener;
+    private NotificationCompat.Builder notificationBuilder;
+    private NotificationManager notificationManager;
+    private int lastProgressUpdate = 0;
 
     public interface TorrentStreamListener {
         void onProgressUpdate(int progress);
@@ -43,6 +48,13 @@ public class TorrentStreamManager implements TorrentServerListener {
         this.listener = listener;
         createNotificationChannel();
         initializeServer();
+        notificationManager = context.getSystemService(NotificationManager.class);
+        notificationBuilder = new NotificationCompat.Builder(context, STREAM_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_stream)
+                .setContentTitle("Preparing Stream")
+                .setProgress(100, 0, false)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW);
     }
 
     private void createNotificationChannel() {
@@ -132,6 +144,10 @@ public class TorrentStreamManager implements TorrentServerListener {
     @Override
     public void onStreamStarted(Torrent torrent) {
         Log.d(TAG, "Stream started");
+        Toast.makeText(context, "Stream started, buffering may take a while... (2-3 minutes)", Toast.LENGTH_LONG).show();
+        notificationBuilder.setContentText("Buffering... 0%")
+                .setProgress(100, 0, false);
+        notificationManager.notify(STREAM_NOTIFICATION_ID, notificationBuilder.build());
     }
 
     @Override
@@ -142,14 +158,13 @@ public class TorrentStreamManager implements TorrentServerListener {
     }
 
     private void showErrorNotification(String message) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, STREAM_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_error)
+        notificationBuilder.setSmallIcon(R.drawable.ic_error)
                 .setContentTitle("Stream Error")
                 .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_HIGH);
-
-        NotificationManager manager = context.getSystemService(NotificationManager.class);
-        manager.notify(STREAM_NOTIFICATION_ID, builder.build());
+                .setProgress(0, 0, false)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setAutoCancel(true);
+        notificationManager.notify(STREAM_NOTIFICATION_ID, notificationBuilder.build());
     }
 
     @Override
@@ -164,37 +179,28 @@ public class TorrentStreamManager implements TorrentServerListener {
             int progress = (int) status.bufferProgress;
             Log.d(TAG, "Progress: " + progress + "%");
             listener.onProgressUpdate(progress);
-            showStreamNotification(progress);
+            
+            // Only update notification if progress has changed significantly
+            if (Math.abs(progress - lastProgressUpdate) >= PROGRESS_UPDATE_THRESHOLD) {
+                notificationBuilder.setContentText("Buffering... " + progress + "%")
+                        .setProgress(100, progress, false);
+                notificationManager.notify(STREAM_NOTIFICATION_ID, notificationBuilder.build());
+                lastProgressUpdate = progress;
+            }
         }
     }
 
-    private void showStreamNotification(int progress) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, STREAM_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_stream)
-                .setContentTitle("Preparing Stream")
-                .setContentText("Buffering... " + progress + "%")
-                .setProgress(100, progress, false)
-                .setOngoing(true)
-                .setOnlyAlertOnce(true);
-
-        NotificationManager manager = context.getSystemService(NotificationManager.class);
-        manager.notify(STREAM_NOTIFICATION_ID, builder.build());
-    }
-
     private void showStreamReadyNotification() {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, STREAM_CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_stream_ready)
+        notificationBuilder.setSmallIcon(R.drawable.ic_stream_ready)
                 .setContentTitle("Stream Ready")
                 .setContentText("Tap to open player")
+                .setProgress(0, 0, false)
                 .setAutoCancel(true);
-
-        NotificationManager manager = context.getSystemService(NotificationManager.class);
-        manager.notify(STREAM_NOTIFICATION_ID, builder.build());
+        notificationManager.notify(STREAM_NOTIFICATION_ID, notificationBuilder.build());
     }
 
     private void cancelNotification() {
-        NotificationManager manager = context.getSystemService(NotificationManager.class);
-        manager.cancel(STREAM_NOTIFICATION_ID);
+        notificationManager.cancel(STREAM_NOTIFICATION_ID);
     }
 
     @Override
