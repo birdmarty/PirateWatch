@@ -1,4 +1,5 @@
 <resources>
+    <string name="welcome">Welcome</string>
     <string name="welcome_back">Welcome Back</string>
     <string name="dont_have_account">Don\'t have an account? Sign Up</string>
     <string name="app_name">Pirate Watch</string>

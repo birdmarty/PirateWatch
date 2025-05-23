@@ -81,9 +81,10 @@ public class SignUp extends Fragment {
                 .addOnCompleteListener(requireActivity(), task -> {
                     progressBar.setVisibility(View.GONE);
                     if (task.isSuccessful()) {
-                        // Send verification email
+                        // Send verification email and sign out
                         sendEmailVerification();
-                        navigateToMain();
+                        mAuth.signOut(); // Sign out until email is verified
+                        navigateToSignIn(); // Navigate to sign in instead of main
                     } else {
                         handleError(task.getException());
                     }
@@ -96,8 +97,17 @@ public class SignUp extends Fragment {
             user.sendEmailVerification()
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            Toast.makeText(getContext(),
-                                    "Verification email sent", Toast.LENGTH_SHORT).show();
+                            if (getActivity() != null) {
+                                Toast.makeText(getActivity(),
+                                        "Verification email sent. Please verify your email before signing in.",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            if (getActivity() != null) {
+                                Toast.makeText(getActivity(),
+                                        "Failed to send verification email: " + task.getException().getMessage(),
+                                        Toast.LENGTH_LONG).show();
+                            }
                         }
                     });
         }

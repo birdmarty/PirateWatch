@@ -1,6 +1,7 @@
 package com.example.myapplication.fragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -28,6 +29,9 @@ public class SignIn extends Fragment {
     private EditText emailEditText, passwordEditText;
     private ProgressBar progressBar;
     private AuthListener authListener;
+    private TextView welcomeText;
+    private static final String PREF_NAME = "AppPrefs";
+    private static final String KEY_FIRST_RUN = "first_run";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -38,10 +42,13 @@ public class SignIn extends Fragment {
         emailEditText = view.findViewById(R.id.email);
         passwordEditText = view.findViewById(R.id.password);
         progressBar = view.findViewById(R.id.progressBar);
+        welcomeText = view.findViewById(R.id.welcome_text);
         Button loginButton = view.findViewById(R.id.login_button);
         Button continueAsGuestButton = view.findViewById(R.id.continue_as_guest_button);
         TextView signupRedirect = view.findViewById(R.id.signup_redirect);
         TextView forgotPassword = view.findViewById(R.id.forgot_password);
+
+        updateWelcomeText();
 
         loginButton.setOnClickListener(v -> attemptLogin());
         continueAsGuestButton.setOnClickListener(v -> continueAsGuest());
@@ -49,6 +56,19 @@ public class SignIn extends Fragment {
         forgotPassword.setOnClickListener(v -> showResetPasswordDialog());
 
         return view;
+    }
+
+    private void updateWelcomeText() {
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        boolean isFirstRun = prefs.getBoolean(KEY_FIRST_RUN, true);
+        
+        if (isFirstRun) {
+            welcomeText.setText(R.string.welcome);
+            // Mark that it's no longer the first run
+            prefs.edit().putBoolean(KEY_FIRST_RUN, false).apply();
+        } else {
+            welcomeText.setText(R.string.welcome_back);
+        }
     }
 
     private void navigateToSignUp() {

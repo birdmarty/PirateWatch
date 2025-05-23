@@ -37,17 +37,25 @@
                     android:id="@+id/categorySpinner"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="0.4"
-                    android:entries="@array/OneThree_category_options" />
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="0.35"
+                    android:entries="@array/OneThree_category_options"
+                    android:padding="4dp"
+                    android:minHeight="48dp"
+                    android:spinnerMode="dropdown"
+                    android:theme="@style/SpinnerTheme" />
 
                 <Spinner
                     android:id="@+id/sortSpinner"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:layout_weight="0.4"
-                    android:entries="@array/OneThree_sort_options" />
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="0.35"
+                    android:entries="@array/OneThree_sort_options"
+                    android:padding="4dp"
+                    android:minHeight="48dp"
+                    android:spinnerMode="dropdown"
+                    android:theme="@style/SpinnerTheme" />
             </LinearLayout>
 
             <!-- Website Selector Buttons -->
