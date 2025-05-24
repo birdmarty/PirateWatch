@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,8 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -46,11 +49,14 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity implements TorrentStreamManager.TorrentStreamListener, SignIn.AuthListener, SignUp.AuthListener, FullScreenLoginFragment.AuthListener, FullScreenSignUpFragment.AuthListener {
 
+    private static final String PREF_NAME = "AppPrefs";
+    private static final String KEY_THEME = "theme_mode";
 
     private TorrentStreamManager torrentStreamManager;
     public TorrentStream torrentStream;
     private static final String TAG = "MainActivity";
     private static final int STORAGE_PERMISSION_CODE = 101;
+    private static final int NOTIFICATION_PERMISSION_CODE = 102;
     private static String keyword;
     private static String sortItem = "Seeds DESC";
     public static int current;
@@ -60,6 +66,9 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Apply theme before setting content view
+        applyTheme();
+        
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
@@ -106,6 +115,13 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
                 loadFragment(new SignIn());
             }
         });
+    }
+
+    private void applyTheme() {
+        SharedPreferences prefs = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        boolean isDarkMode = prefs.getBoolean(KEY_THEME, false);
+        AppCompatDelegate.setDefaultNightMode(isDarkMode ? 
+            AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     private void showNavigationButtons(boolean show) {
@@ -350,6 +366,17 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
 
 
     private void requestPermissions() {
+        // Request notification permission for Android 13 and above
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) 
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, 
+                    new String[]{Manifest.permission.POST_NOTIFICATIONS}, 
+                    NOTIFICATION_PERMISSION_CODE);
+            }
+        }
+
+        // Request storage permissions
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             if (!Environment.isExternalStorageManager()) {
                 Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
@@ -362,14 +389,15 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
             }
         } else {
             String[] permissions = {
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.INTERNET
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.INTERNET
             };
 
             boolean allPermissionsGranted = true;
             for (String permission : permissions) {
-                if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                if (ContextCompat.checkSelfPermission(this, permission) 
+                        != PackageManager.PERMISSION_GRANTED) {
                     allPermissionsGranted = false;
                     break;
                 }
@@ -385,6 +413,34 @@ public class MainActivity extends AppCompatActivity implements TorrentStreamMana
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        
+        if (requestCode == STORAGE_PERMISSION_CODE) {
+            boolean allGranted = true;
+            for (int result : grantResults) {
+                if (result != PackageManager.PERMISSION_GRANTED) {
+                    allGranted = false;
+                    break;
+                }
+            }
+            if (allGranted) {
+                if (!isInitialized) {
+                    initializeTorrentSystem();
+                }
+            } else {
+                Toast.makeText(this, "Storage permissions are required for the app to function properly", Toast.LENGTH_LONG).show();
+            }
+        } else if (requestCode == NOTIFICATION_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Notification permission granted
+                Log.d(TAG, "Notification permission granted");
+            } else {
+                Toast.makeText(this, "Notification permission is recommended for better experience", Toast.LENGTH_LONG).show();
+            }
+        }
+    }
 
     private final TextView.OnEditorActionListener editorActionListener = new TextView.OnEditorActionListener() {
         @Override

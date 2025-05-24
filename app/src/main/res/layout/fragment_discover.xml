@@ -71,20 +71,20 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:background="@color/accent"
                     android:padding="8dp"
-                    android:src="@drawable/logo_1337x"
                     android:scaleType="fitCenter"
-                    android:background="?attr/selectableItemBackground"/>
+                    android:src="@drawable/logo_1337x" />
 
                 <ImageView
                     android:id="@+id/tvLimeTorrents"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:background="@color/accent"
                     android:padding="8dp"
-                    android:src="@drawable/logo_limetorrents"
                     android:scaleType="fitCenter"
-                    android:background="?attr/selectableItemBackground"/>
+                    android:src="@drawable/logo_limetorrents" />
             </LinearLayout>
         </LinearLayout>
 

@@ -1,8 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="gray">#555555</color>
-    <color name="your_active_color">#353433</color>
-    <color name="design_default_color_primary">#A5A4A4</color>
+    <!-- Primary Brand Colors -->
+    <color name="primary">#31b1b1</color>
+    <color name="primary_dark">#2a9e9e</color>
+    <color name="primary_light">#4bc0c0</color>
+    
+    <!-- Secondary Colors -->
+    <color name="secondary">#232423</color>
+    <color name="secondary_dark">#1a1b1a</color>
+    <color name="secondary_light">#2c2d2c</color>
+    
+    <!-- Background Colors -->
+    <color name="background_light">#FFFFFF</color>
+    <color name="background_dark">#000000</color>
+    <color name="surface_light">#F5F5F5</color>
+    <color name="surface_dark">#121212</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary_light">#000000</color>
+    <color name="text_secondary_light">#757575</color>
+    <color name="text_primary_dark">#FFFFFF</color>
+    <color name="text_secondary_dark">#B3FFFFFF</color>
+    
+    <!-- Accent Colors -->
+    <color name="accent">#31b1b1</color>
+    <color name="accent_dark">#2a9e9e</color>
+    
+    <!-- Status Colors -->
+    <color name="success">#4CAF50</color>
+    <color name="error">#F44336</color>
+    <color name="warning">#FFC107</color>
+    <color name="info">#2196F3</color>
+    
+    <!-- Legacy Colors (for compatibility) -->
+    <color name="purple_200">#31b1b1</color>
+    <color name="purple_500">#31b1b1</color>
+    <color name="purple_700">#2a9e9e</color>
+    <color name="teal_200">#31b1b1</color>
+    <color name="teal_700">#2a9e9e</color>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="gray">#232423</color>
 </resources>

@@ -2,6 +2,7 @@ package com.example.myapplication.fragments;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -15,11 +16,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 
 import com.example.myapplication.R;
 import com.example.myapplication.utils.DownloadLocationManager;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,6 +41,9 @@ public class ProfileFragment extends Fragment implements FullScreenLoginFragment
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String TAG = "ProfileFragment";
+    private static final String PREF_NAME = "AppPrefs";
+    private static final String KEY_THEME = "theme_mode";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -46,6 +52,7 @@ public class ProfileFragment extends Fragment implements FullScreenLoginFragment
     private TextView currentEmailView;
     private TextView currentDownloadLocationView;
     private ProgressBar progressBar;
+    private SwitchMaterial themeSwitch;
     private FirebaseAuth mAuth;
     private File currentDownloadLocation;
 
@@ -92,10 +99,14 @@ public class ProfileFragment extends Fragment implements FullScreenLoginFragment
         currentEmailView = view.findViewById(R.id.current_email);
         currentDownloadLocationView = view.findViewById(R.id.current_download_location);
         progressBar = view.findViewById(R.id.progressBar);
+        themeSwitch = view.findViewById(R.id.theme_switch);
         MaterialButton changePasswordButton = view.findViewById(R.id.btn_change_password);
         MaterialButton changeEmailButton = view.findViewById(R.id.btn_change_email);
         MaterialButton logoutButton = view.findViewById(R.id.btn_logout);
         MaterialButton changeDownloadLocationButton = view.findViewById(R.id.btn_change_download_location);
+
+        // Set up theme switch
+        setupThemeSwitch();
 
         // Set up click listeners
         changePasswordButton.setOnClickListener(v -> showChangePasswordDialog());
@@ -119,6 +130,34 @@ public class ProfileFragment extends Fragment implements FullScreenLoginFragment
         updateDownloadLocationText();
     }
 
+    private void setupThemeSwitch() {
+        // Get current theme mode from preferences
+        SharedPreferences prefs = requireActivity().getSharedPreferences(PREF_NAME, 0);
+        boolean isDarkMode = prefs.getBoolean(KEY_THEME, false);
+        
+        // Set initial switch state
+        themeSwitch.setChecked(isDarkMode);
+        
+        // Set initial theme
+        AppCompatDelegate.setDefaultNightMode(isDarkMode ? 
+            AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+        
+        // Set up switch listener
+        themeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Save preference
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean(KEY_THEME, isChecked);
+            editor.apply();
+            
+            // Apply theme
+            AppCompatDelegate.setDefaultNightMode(isChecked ? 
+                AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+            
+            // Restart activity to apply theme changes
+            requireActivity().recreate();
+        });
+    }
+
     private void updateUI(View view) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -131,7 +170,7 @@ public class ProfileFragment extends Fragment implements FullScreenLoginFragment
                 view.findViewById(R.id.btn_change_email).setVisibility(View.GONE);
             } else {
                 // Regular user
-                currentEmailView.setText("Current Email: " + user.getEmail());
+            currentEmailView.setText("Current Email: " + user.getEmail());
                 MaterialButton logoutButton = view.findViewById(R.id.btn_logout);
                 logoutButton.setText("Log Out");
                 view.findViewById(R.id.btn_change_password).setVisibility(View.VISIBLE);
@@ -139,7 +178,7 @@ public class ProfileFragment extends Fragment implements FullScreenLoginFragment
             }
         }
         if (currentDownloadLocation != null){
-            currentDownloadLocationView.setText("Current Location: " + currentDownloadLocation.getAbsolutePath());
+        currentDownloadLocationView.setText("Current Location: " + currentDownloadLocation.getAbsolutePath());
         }
         else {
             currentDownloadLocationView.setText("Current Location: Not set");
@@ -279,17 +318,17 @@ public class ProfileFragment extends Fragment implements FullScreenLoginFragment
                     .commit();
         } else {
             // For regular users, show confirmation dialog
-            new AlertDialog.Builder(getContext())
-                    .setTitle("Logout")
-                    .setMessage("Are you sure you want to logout?")
-                    .setPositiveButton("Yes", (dialog, which) -> {
-                        mAuth.signOut();
-                        requireActivity().getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, new SignUp())
-                                .commit();
-                    })
-                    .setNegativeButton("No", null)
-                    .show();
+        new AlertDialog.Builder(getContext())
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    mAuth.signOut();
+                    requireActivity().getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, new SignUp())
+                            .commit();
+                })
+                .setNegativeButton("No", null)
+                .show();
         }
     }
 
@@ -323,11 +362,11 @@ public class ProfileFragment extends Fragment implements FullScreenLoginFragment
                 // Update the download location using the URI
                 DownloadLocationManager.getInstance(requireContext()).setCurrentLocationFromUri(treeUri);
                 currentDownloadLocation = DownloadLocationManager.getInstance(requireContext()).getCurrentLocation();
-                // Update the UI
+                    // Update the UI
                 updateUI(requireView());
-                Toast.makeText(getContext(), "Download location updated", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Download location updated", Toast.LENGTH_SHORT).show();
+                }
             }
-        }
     }
 
     private void updateDownloadLocation(File newLocation) {

@@ -344,8 +344,8 @@ public class DiscoverFragment extends Fragment implements TorrentAdapter.Recycle
         ImageView tv1337x = getView().findViewById(R.id.tv1337x);
         ImageView tvLime = getView().findViewById(R.id.tvLimeTorrents);
 
-        int activeColor = ContextCompat.getColor(requireContext(), R.color.your_active_color);
-        int inactiveColor = ContextCompat.getColor(requireContext(), R.color.design_default_color_primary);
+        int activeColor = ContextCompat.getColor(requireContext(), R.color.primary);
+        int inactiveColor = ContextCompat.getColor(requireContext(), R.color.primary);
 
         tv1337x.setBackgroundColor(currentSite.equals(SITE_1337X) ? activeColor : inactiveColor);
         tvLime.setBackgroundColor(currentSite.equals(SITE_LIME) ? activeColor : inactiveColor);

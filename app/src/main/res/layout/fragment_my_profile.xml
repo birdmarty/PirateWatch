@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="?android:attr/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -18,7 +19,7 @@
             android:text="Account"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@color/design_default_color_primary"
+            android:textColor="?attr/colorPrimary"
             android:layout_marginBottom="16dp"/>
 
         <!-- Email Info -->
@@ -28,7 +29,32 @@
             android:layout_height="wrap_content"
             android:text="Current Email: "
             android:textSize="16sp"
+            android:textColor="?android:attr/textColorPrimary"
             android:layout_marginBottom="8dp"/>
+
+        <!-- Theme Toggle -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Dark Mode"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/theme_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:thumbTint="?attr/colorPrimary"
+                app:trackTint="?attr/colorPrimary" />
+        </LinearLayout>
 
         <!-- Change Password Button -->
         <com.google.android.material.button.MaterialButton
@@ -55,7 +81,7 @@
             android:layout_height="wrap_content"
             android:text="Log Out"
             android:layout_marginBottom="24dp"
-            app:backgroundTint="@android:color/holo_red_light"/>
+            app:backgroundTint="@color/error"/>
 
         <!-- Download Settings Section -->
         <TextView
@@ -64,7 +90,7 @@
             android:text="Download Settings"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@color/design_default_color_primary"
+            android:textColor="?attr/colorPrimary"
             android:layout_marginBottom="16dp"/>
 
         <!-- Current Download Location -->
@@ -74,6 +100,7 @@
             android:layout_height="wrap_content"
             android:text="Current Location: "
             android:textSize="16sp"
+            android:textColor="?android:attr/textColorPrimary"
             android:layout_marginBottom="8dp"/>
 
         <!-- Change Download Location Button -->
@@ -90,7 +117,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:indeterminateTint="?attr/colorPrimary"/>
 
     </LinearLayout>
 </ScrollView>

@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/white"
+    android:background="?attr/colorSurface"
     android:padding="16dp">
 
     <!-- Close Button -->
@@ -14,6 +14,7 @@
         android:layout_margin="8dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:tint="?attr/colorOnSurface"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,7 +26,7 @@
         android:layout_marginTop="32dp"
         android:text="Welcome Back"
         android:textSize="24sp"
-        android:textColor="@color/design_default_color_primary"
+        android:textColor="?attr/colorPrimary"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -39,14 +40,17 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         app:layout_constraintTop_toBottomOf="@id/title"
-        app:errorEnabled="true">
+        app:errorEnabled="true"
+        app:boxStrokeColor="?attr/colorPrimary"
+        app:hintTextColor="?attr/colorPrimary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Password Input -->
@@ -58,14 +62,17 @@
         android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/email_container"
         app:passwordToggleEnabled="true"
-        app:errorEnabled="true">
+        app:errorEnabled="true"
+        app:boxStrokeColor="?attr/colorPrimary"
+        app:hintTextColor="?attr/colorPrimary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:textColor="?attr/colorOnSurface" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Forgot Password -->
@@ -75,7 +82,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="Forgot Password?"
-        android:textColor="@color/design_default_color_secondary"
+        android:textColor="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/password_container" />
 
@@ -87,8 +94,8 @@
         android:layout_marginTop="32dp"
         android:text="Login"
         android:textAllCaps="false"
-        android:backgroundTint="@color/design_default_color_primary"
-        android:textColor="@android:color/white"
+        android:backgroundTint="?attr/colorPrimary"
+        android:textColor="?attr/colorOnPrimary"
         app:layout_constraintTop_toBottomOf="@id/forgot_password" />
 
     <!-- Progress Bar -->
@@ -97,6 +104,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        android:indeterminateTint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -109,7 +117,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Don't have an account? Sign Up"
-        android:textColor="@color/design_default_color_secondary"
+        android:textColor="?attr/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/progressBar" />
